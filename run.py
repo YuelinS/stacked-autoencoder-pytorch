@@ -1,35 +1,38 @@
 import os
 import time
-
+import tqdm
 import torch
 import torchvision
 from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from torchvision.datasets import MNIST, CIFAR10
 from torchvision.utils import save_image
-
 from model import StackedAutoEncoder
+from FaceDataset import FaceDataset
 
-if not os.path.exists('./imgs'):
-    os.mkdir('./imgs')
+num_epochs = 100  # 1000
+batch_size = 200 # 128
+flag_sample_epoch = 20
+
+data_path = 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000' # 'D:/git/imgs/'
+size = 64
 
 def to_img(x):
-    x = x.view(x.size(0), 3, 32, 32)
+    x = x.view(x.size(0), 3, size, size)
     return x
 
-num_epochs = 1000
-batch_size = 128
 
 img_transform = transforms.Compose([
     #transforms.RandomRotation(360),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0, hue=0),
+#    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0, hue=0),
+    transforms.Resize((64,46)),
+    transforms.Pad((9,0,9,0), fill=0, padding_mode='constant'),
     transforms.ToTensor(),
 ])
 
-dataset = CIFAR10('../data/cifar10/', transform=img_transform)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8)
+dataset = FaceDataset(data_path, transform=img_transform)
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
 model = StackedAutoEncoder().cuda()
 
@@ -43,9 +46,7 @@ for epoch in range(num_epochs):
     model.train()
     total_time = time.time()
     correct = 0
-    for i, data in enumerate(dataloader):
-        img, target = data
-        target = Variable(target).cuda()
+    for i, img in enumerate(dataloader):  
         img = Variable(img).cuda()
         features = model(img).detach()
         # prediction = classifier(features.view(features.size(0), -1))
@@ -60,17 +61,15 @@ for epoch in range(num_epochs):
     total_time = time.time() - total_time
 
     model.eval()
-    img, _ = data
-    img = Variable(img).cuda()
     features, x_reconstructed = model(img)
     reconstruction_loss = torch.mean((x_reconstructed.data - img.data)**2)
 
-    if epoch % 20 == 0:
+    if epoch % flag_sample_epoch == 0:
         print("Saving epoch {}".format(epoch))
         orig = to_img(img.cpu().data)
-        save_image(orig, './imgs/orig_{}.png'.format(epoch))
+        save_image(orig, '../recon/orig_{}.png'.format(epoch))
         pic = to_img(x_reconstructed.cpu().data)
-        save_image(pic, './imgs/reconstruction_{}.png'.format(epoch))
+        save_image(pic, '../recon/reconstruction_{}.png'.format(epoch))
 
     print("Epoch {} complete\tTime: {:.4f}s\t\tLoss: {:.4f}".format(epoch, total_time, reconstruction_loss))
     print("Feature Statistics\tMean: {:.4f}\t\tMax: {:.4f}\t\tSparsity: {:.4f}%".format(
