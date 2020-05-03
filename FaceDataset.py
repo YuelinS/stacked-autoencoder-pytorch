@@ -11,9 +11,41 @@ Created on Sat May  2 22:15:49 2020
 import os
 import torch
 from skimage import io
+import numpy as np
 from torch.utils.data import Dataset
 from PIL import Image
+        
+        
+class FaceArrayDataset(Dataset):
+    """Face dataset."""
 
+    def __init__(self, root_dir, transform=None):
+        """
+        Args:
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
+        self.root_dir = root_dir
+        self.array = np.load(self.root_dir)        
+        self.transform = transform
+
+    def __len__(self):       
+        return len(self.array)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = Image.fromarray(self.array[idx])      
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample    
+
+    
+#%%
 class FaceDataset(Dataset):
     """Face dataset."""
 
@@ -52,7 +84,8 @@ class FaceDataset(Dataset):
 # import matplotlib.pyplot as plt
 # from torchvision import transforms
 # 
-# data_path = 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000'  #'D:/git/imgs/' #  
+# data_path = 'D:/git/imgs/face_array_100k.npy' # 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000'  #'D:/git/imgs/' #  
+# 
 # 
 # img_transform = transforms.Compose([
 #     #transforms.RandomRotation(360),
@@ -62,7 +95,7 @@ class FaceDataset(Dataset):
 #     transforms.ToTensor(),
 # ])
 # 
-# face_dataset = FaceDataset(data_path, transform=img_transform)
+# face_dataset = FaceArrayDataset(data_path, transform=img_transform)
 # 
 # 
 # fig = plt.figure()
@@ -76,7 +109,7 @@ class FaceDataset(Dataset):
 #     plt.tight_layout()
 #     ax.set_title('Sample #{}'.format(i))
 #     ax.axis('off')
-#     plt.imshow(sample.numpy().transpose(1, 2, 0))   
+#     plt.imshow(sample.numpy().transpose(1,2,0)[:,:,0])   
 # 
 #     plt.show()
 # =============================================================================

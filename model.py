@@ -59,7 +59,7 @@ class StackedAutoEncoder(nn.Module):
     def __init__(self):
         super(StackedAutoEncoder, self).__init__()
 
-        self.ae1 = CDAutoEncoder(3, 128, 2)
+        self.ae1 = CDAutoEncoder(1, 128, 2)
         self.ae2 = CDAutoEncoder(128, 256, 2)
         self.ae3 = CDAutoEncoder(256, 512, 2)
 
@@ -72,10 +72,11 @@ class StackedAutoEncoder(nn.Module):
             return a3
 
         else:
-            return a3, self.reconstruct(a3)
+            x_reconstruct, a1_reconstruct, a2_reconstruct = self.reconstruct(a3)
+            return a1,a2,a3, x_reconstruct, a1_reconstruct, a2_reconstruct
 
     def reconstruct(self, x):
             a2_reconstruct = self.ae3.reconstruct(x)
             a1_reconstruct = self.ae2.reconstruct(a2_reconstruct)
             x_reconstruct = self.ae1.reconstruct(a1_reconstruct)
-            return x_reconstruct
+            return x_reconstruct, a1_reconstruct, a2_reconstruct
