@@ -34,11 +34,11 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_worker
 model = StackedAutoEncoder().cuda()
 
 for epoch in range(num_epochs):
-    # if epoch % 10 == 0:
-    #     # Test the quality of our features with a randomly initialzed linear classifier.
-    #     classifier = nn.Linear(512 * 16, 10).cuda()
-    #     criterion = nn.CrossEntropyLoss()
-    #     optimizer = torch.optim.Adam(classifier.parameters(), lr=0.001)
+    if epoch % 10 == 0:
+        # Test the quality of our features with a randomly initialzed linear classifier.
+        classifier = nn.Linear(512 * 16, 10).cuda()
+        criterion = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(classifier.parameters(), lr=0.001)
 
     model.train()
     total_time = time.time()
@@ -48,14 +48,14 @@ for epoch in range(num_epochs):
         target = Variable(target).cuda()
         img = Variable(img).cuda()
         features = model(img).detach()
-        # prediction = classifier(features.view(features.size(0), -1))
-        # loss = criterion(prediction, target)
+        prediction = classifier(features.view(features.size(0), -1))
+        loss = criterion(prediction, target)
 
-        # optimizer.zero_grad()
-        # loss.backward()
-        # optimizer.step()
-        # pred = prediction.data.max(1, keepdim=True)[1]
-        # correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        pred = prediction.data.max(1, keepdim=True)[1]
+        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     total_time = time.time() - total_time
 
@@ -65,7 +65,7 @@ for epoch in range(num_epochs):
     features, x_reconstructed = model(img)
     reconstruction_loss = torch.mean((x_reconstructed.data - img.data)**2)
 
-    if epoch % 20 == 0:
+    if epoch % 10 == 0:
         print("Saving epoch {}".format(epoch))
         orig = to_img(img.cpu().data)
         save_image(orig, './imgs/orig_{}.png'.format(epoch))
@@ -76,7 +76,7 @@ for epoch in range(num_epochs):
     print("Feature Statistics\tMean: {:.4f}\t\tMax: {:.4f}\t\tSparsity: {:.4f}%".format(
         torch.mean(features.data), torch.max(features.data), torch.sum(features.data == 0.0)*100 / features.data.numel())
     )
-    # print("Linear classifier performance: {}/{} = {:.2f}%".format(correct, len(dataloader)*batch_size, 100*float(correct) / (len(dataloader)*batch_size)))
+    print("Linear classifier performance: {}/{} = {:.2f}%".format(correct, len(dataloader)*batch_size, 100*float(correct) / (len(dataloader)*batch_size)))
     print("="*80)
 
-# torch.save(model.state_dict(), './CDAE.pth')
+torch.save(model.state_dict(), './CDAE.pth')
