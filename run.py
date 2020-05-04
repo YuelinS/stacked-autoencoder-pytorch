@@ -1,8 +1,5 @@
-import os
 import time
 import torch
-import torchvision
-from torch import nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -11,13 +8,13 @@ from model import StackedAutoEncoder
 from FaceDataset import FaceArrayDataset
 import numpy as np
 
-num_epochs = 1  # 1000
-batch_size = 200 # 128
-flag_sample_epoch = 1
+num_epochs = 25  # 1000
+batch_size = 100 # 128
+flag_sample_epoch = 10
 
 datasz = '10k'  # '100k'
 data_path = 'D:/git/imgs/face_array_' + datasz + '.npy' # 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000' # 'D:/git/imgs/'
-size = 64
+size = 32
 n_chn = 1
 
 
@@ -29,8 +26,8 @@ def to_img(x):
 img_transform = transforms.Compose([
     #transforms.RandomRotation(360),
 #    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0, hue=0),
-    transforms.Resize((64,45)),
-    transforms.Pad((9,0,10,0), fill=128/255, padding_mode='constant'),
+    transforms.Resize((32,22)),
+    transforms.Pad((5,0,5,0), fill=128/255, padding_mode='constant'),
     transforms.ToTensor(),
 ])
 
@@ -72,7 +69,7 @@ for epoch in range(num_epochs):
     if epoch == num_epochs-1:
 #       a1,a2,features, x_recon, a1_recon, a2_recon = model(img)
         outputs_ts = model(img)
-        outputs = [k.detach().cpu().numpy() for k in outputs_ts]
+        outputs = [img.detach().cpu().numpy()] + [k.detach().cpu().numpy() for k in outputs_ts] 
         np.savez('../recon/batch_activation_' + datasz + '.npz', *outputs)
 
      

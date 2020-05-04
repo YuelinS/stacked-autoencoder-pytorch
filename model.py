@@ -1,8 +1,9 @@
 import torch
 from torch import nn
 from torch.autograd import Variable
-import torch.nn.functional as F
 
+v_ker_size = 2
+v_stride = 1
 
 class CDAutoEncoder(nn.Module):
     r"""
@@ -14,20 +15,20 @@ class CDAutoEncoder(nn.Module):
         output_size: The number of features to output
         stride: Stride of the convolutional layers.
     """
-    def __init__(self, input_size, output_size, stride):
+    def __init__(self, input_size, output_size, kernel_size, stride):
         super(CDAutoEncoder, self).__init__()
 
         self.forward_pass = nn.Sequential(
-            nn.Conv2d(input_size, output_size, kernel_size=2, stride=stride, padding=0),
+            nn.Conv2d(input_size, output_size, kernel_size=kernel_size, stride=stride, padding=2),
             nn.ReLU(),
         )
         self.backward_pass = nn.Sequential(
-            nn.ConvTranspose2d(output_size, input_size, kernel_size=2, stride=2, padding=0), 
+            nn.ConvTranspose2d(output_size, input_size, kernel_size=kernel_size, stride=stride, padding=2), 
             nn.ReLU(),
         )
 
         self.criterion = nn.MSELoss()
-        self.optimizer = torch.optim.SGD(self.parameters(), lr=0.1)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=0.1)
 
     def forward(self, x):
         # Train each autoencoder individually
@@ -59,9 +60,9 @@ class StackedAutoEncoder(nn.Module):
     def __init__(self):
         super(StackedAutoEncoder, self).__init__()
 
-        self.ae1 = CDAutoEncoder(1, 128, 2)
-        self.ae2 = CDAutoEncoder(128, 256, 2)
-        self.ae3 = CDAutoEncoder(256, 512, 2)
+        self.ae1 = CDAutoEncoder(1, 128, v_ker_size, v_stride)
+        self.ae2 = CDAutoEncoder(128, 256, v_ker_size, v_stride)
+        self.ae3 = CDAutoEncoder(256, 512, v_ker_size, v_stride)
 
     def forward(self, x):
         a1 = self.ae1(x)
