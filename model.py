@@ -3,7 +3,7 @@ from torch import nn
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import ReduceLROnPlateau 
 
-n_layer = 3
+n_layer = 2
 n_chn = [1, 64, 128, 256]
 output_paddings = [0,1,0]
 v_ker_size = 4 

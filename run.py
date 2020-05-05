@@ -8,7 +8,7 @@ from model import StackedAutoEncoder
 from FaceDataset import FaceArrayDataset
 import numpy as np
 
-num_epochs = 20  # 1000
+num_epochs = 100  # 1000
 batch_size = 64 # 128
 flag_sample_epoch = 6
 
@@ -26,8 +26,8 @@ def main():
     img_transform = transforms.Compose([
         #transforms.RandomRotation(360),
     #    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0, hue=0),
-        transforms.Resize((32,22)),
-        transforms.Pad((5,0,5,0), fill=128/255, padding_mode='constant'),
+        transforms.Resize((32,22)),  # 64,45
+        transforms.Pad((5,0,5,0), fill=128/255, padding_mode='constant'),  # 9,0,10,0
         transforms.ToTensor(),
     ])
     
@@ -48,7 +48,8 @@ def main():
         total_time = time.time() - total_time
     
         model.eval()
-        _,_,features, x_recon,_,_ = model(img)
+#        _,_,features, x_recon,_,_ = model(img)
+        _,features, x_recon,_ = model(img)
         recon_loss = torch.mean((x_recon.data - img.data)**2)
     
         model.update_scheduler(recon_loss)
@@ -75,7 +76,7 @@ def main():
             np.savez('../recon/batch_activation_' + datasz + '.npz', *outputs)
     
          
-    # torch.save(model.state_dict(), './CDAE.pth')
+#    torch.save(model.state_dict(), 'D:/git/stacked-autoencoder-pytorch/saved_model.pth')
 
 if __name__ == '__main__':
     main()
