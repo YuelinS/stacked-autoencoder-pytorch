@@ -34,8 +34,8 @@ def main():
     dataset = FaceArrayDataset(data_path, transform=img_transform)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     
-    model = StackedAutoEncoder()
-    model = model.to('cuda')
+    model = StackedAutoEncoder().cuda()
+#    model = model.to('cuda')
     
     for epoch in range(num_epochs):
     
@@ -71,7 +71,7 @@ def main():
         if epoch == num_epochs-1:
     #       a1,a2,features, x_recon, a1_recon, a2_recon = model(img)
             outputs_ts = model(img)
-            outputs = [k.detach().cpu().numpy() for k in img + outputs_ts] 
+            outputs = [img.detach().cpu().numpy()] + [k.detach().cpu().numpy() for k in outputs_ts] 
             np.savez('../recon/batch_activation_' + datasz + '.npz', *outputs)
     
          
