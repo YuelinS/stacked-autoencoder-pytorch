@@ -36,7 +36,7 @@ class CDAutoEncoder(nn.Module):
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min')
-#        self = self.to('cuda')
+
         
         
     def forward(self, x):
@@ -70,9 +70,7 @@ class StackedAutoEncoder(nn.Module):
         super(StackedAutoEncoder, self).__init__()
         for layer in range(n_layer):
             self.add_module(f'ae{layer}',CDAutoEncoder(n_chn[layer], n_chn[layer+1], v_ker_size, v_stride,output_paddings[layer]))
-#        self.ae1 = CDAutoEncoder(n_chn[0], n_chn[1], v_ker_size, v_stride,0)
-#        self.ae2 = CDAutoEncoder(n_chn[1], n_chn[2], v_ker_size, v_stride,1)
-#        self.ae3 = CDAutoEncoder(n_chn[2], n_chn[3], v_ker_size, v_stride,0)
+
 
     def forward(self, x):
         fw_out =  Variable(x).cuda()
@@ -81,19 +79,16 @@ class StackedAutoEncoder(nn.Module):
             fw_in =  Variable(fw_out).cuda()
             fw_out = self._modules[f'ae{layer}'](fw_in)
             fw_outs.append(fw_out)
-#        a1 = self.ae1(x)
-#        a2 = self.ae2(a1)
-#        a3 = self.ae3(a2)
+
 
         if self.training:
             return fw_out
-#            return a3
 
         else:
-#            x_reconstruct, a1_reconstruct, a2_reconstruct = self.reconstruct(a3)
-#            return a1,a2,a3, x_reconstruct, a1_reconstruct, a2_reconstruct
+
             rc_outs = self.reconstruct(fw_out)
             return fw_outs + rc_outs
+
 
     def reconstruct(self, x):
         rc_out = x
@@ -103,15 +98,8 @@ class StackedAutoEncoder(nn.Module):
             rc_out = self._modules[f'ae{layer}'].reconstruct(rc_in)
             rc_outs.insert(0,rc_out)
         return rc_outs
-#            a2_reconstruct = self.ae3.reconstruct(x)
-#            a1_reconstruct = self.ae2.reconstruct(a2_reconstruct)
-#            x_reconstruct = self.ae1.reconstruct(a1_reconstruct)
-#            return x_reconstruct, a1_reconstruct, a2_reconstruct
         
     
     def update_scheduler(self,recon_loss): 
         for layer in range(n_layer):
             self._modules[f'ae{layer}'].scheduler.step(recon_loss)
-#        self.ae1.scheduler.step(recon_loss)
-#        self.ae2.scheduler.step(recon_loss)
-#        self.ae3.scheduler.step(recon_loss)

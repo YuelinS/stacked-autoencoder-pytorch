@@ -8,7 +8,7 @@ from model import StackedAutoEncoder
 from FaceDataset import FaceArrayDataset
 import numpy as np
 
-num_epochs = 1  # 1000
+num_epochs = 20  # 1000
 batch_size = 64 # 128
 flag_sample_epoch = 6
 
