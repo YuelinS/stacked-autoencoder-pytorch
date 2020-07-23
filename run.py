@@ -75,8 +75,8 @@ def main():
             outputs = [img.detach().cpu().numpy()] + [k.detach().cpu().numpy() for k in outputs_ts] 
             np.savez('../recon/batch_activation_' + datasz + '.npz', *outputs)
     
-         
-#    torch.save(model.state_dict(), 'D:/git/stacked-autoencoder-pytorch/saved_model.pth')
+    
+    torch.save(model.state_dict(), 'D:/git/stacked-autoencoder-pytorch/saved_model.pth')
 
 if __name__ == '__main__':
     main()

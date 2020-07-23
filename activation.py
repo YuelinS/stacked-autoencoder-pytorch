@@ -7,13 +7,13 @@ Created on Sun May  3 16:15:23 2020
 import numpy as np
 import matplotlib.pyplot as plt
 
-rfd = 'D:/git/visualize/'
+rfd = 'D:/git/visualize/paper/'
 datasz = '10k'
 
 
 filenames = ['arr_0','arr_1','arr_2','arr_3','arr_4']
 activations = np.load('../recon/batch_activation_' + datasz +'.npz')
-a0, a1, a2, a3, a4 = [activations[k] for k in filenames]
+#a0, a1, a2, a3, a4 = [activations[k] for k in filenames]
 
 # (n_img, n_chn, sz, sz)
 
@@ -59,7 +59,7 @@ for img in range(n_img):
 
 
 #%%
-layer = 1
+layer = 0
 
 ff = activations[filenames[layer]]
 fb = activations[filenames[layer+3]]
@@ -68,7 +68,7 @@ n_chn = ff.shape[1]
 
 ## For each image
 
-flag_img = range(2)  #range(batch_size)  # 
+flag_img = range(1)  #range(batch_size)  # 
 flag_chn = range(n_chn)  #range(20)  # [0]  #
 row, col = 4, 4  # 1,3  #
 
@@ -108,7 +108,7 @@ for img in flag_img:
             fig.savefig(rfd + f'pop_activation_layer{layer}_img{img}_chns#{ifig}.png')
 
 
-## For each neuron
+#%% For each neuron
            
 flag_chn = range(n_chn)  # range(3)  # [0]  #
 row, col = 4, 4  # 1,3  #
