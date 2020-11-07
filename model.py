@@ -4,11 +4,12 @@ from torch.autograd import Variable
 from torch.optim.lr_scheduler import ReduceLROnPlateau 
 
 n_layer = 2
-n_chn = [1, 80, 80, 256]
+# n_chn = [1, 80, 80, 256]
+n_chn = [1, 60, 10]
 output_paddings = [0,1,0]
 v_ker_size = 4 
 v_stride = 2
-lr = 1e-2
+lr = 1e-3
 
 
 class CDAutoEncoder(nn.Module):
@@ -35,7 +36,7 @@ class CDAutoEncoder(nn.Module):
 
         self.criterion = nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
-        self.scheduler = ReduceLROnPlateau(self.optimizer, 'min')
+        self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', factor=0.3, patience=5)
 
         
         

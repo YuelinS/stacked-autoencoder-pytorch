@@ -27,7 +27,8 @@ class FaceArrayDataset(Dataset):
                 on a sample.
         """
         self.root_dir = root_dir
-        self.array = np.load(self.root_dir)        
+        # import pdb; pdb.set_trace()        
+        self.array = np.load(self.root_dir,allow_pickle = True)           
         self.transform = transform
 
     def __len__(self):       
@@ -79,12 +80,12 @@ class FaceDataset(Dataset):
     
           
 
+#%% Take a look at the first 3 images
 # =============================================================================
-# #%% Take a look at the first 3 images
 # import matplotlib.pyplot as plt
 # from torchvision import transforms
 # 
-# data_path = 'D:/git/imgs/face_array_100k.npy' # 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000'  #'D:/git/imgs/' #  
+# data_path = 'D:/git/stacked-autoencoder-pytorch/imgs/face_array_10k.npy' # 'D:/180921_Feedback/5Occluded_AM/stim2/prepare_real_Liang/human_face_2000/2000'  #'D:/git/imgs/' #  
 # 
 # 
 # img_transform = transforms.Compose([
@@ -109,8 +110,8 @@ class FaceDataset(Dataset):
 #     plt.tight_layout()
 #     ax.set_title('Sample #{}'.format(i))
 #     ax.axis('off')
+#     # in pytorch uses gbr? this model allows color img
 #     plt.imshow(sample.numpy().transpose(1,2,0)[:,:,0])   
-# 
 #     plt.show()
 # =============================================================================
   
